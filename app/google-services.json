@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "191313110315",
+    "firebase_url": "https://recipes-app-bc283.firebaseio.com",
+    "project_id": "recipes-app-bc283",
+    "storage_bucket": "recipes-app-bc283.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:191313110315:android:7e10cf9a82056787",
+        "android_client_info": {
+          "package_name": "ronapplication.com.recipes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "191313110315-2cmui0b5b96svpo90iktd4tkrhaq02qe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ronapplication.com.recipes",
+            "certificate_hash": "ac11fffb2dbdef634d685daeae6c10c85a3b6961"
+          }
+        },
+        {
+          "client_id": "191313110315-815jk6s1cn9eilm7cmulf42ev9vkt39k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXBZuLQxdqlsw_xooK4cTHOGbgTTXr0K0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "191313110315-815jk6s1cn9eilm7cmulf42ev9vkt39k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
