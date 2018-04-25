@@ -1,45 +1,40 @@
-package ronapplication.com.recipes.Database;
+package ronapplication.com.recipes.Provider.FireBaseStorage;
 
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-
-import java.util.concurrent.Executor;
+import com.squareup.picasso.Picasso;
 
 import ronapplication.com.recipes.Constants;
+import ronapplication.com.recipes.R;
 
-public class MyFireBase {
-    final String Tag = "MyFireBase";
-    private DatabaseReference database;
-    private StorageReference storageRef;
+public class MyFireBaseStorage {
+
+    private final String Tag = "MyFireBaseStorage";
     private String recipes_dir = Constants.FIREBASE_IMAGES_PATH + "recipes/";
     private String food_pictures_dir = Constants.FIREBASE_IMAGES_PATH + "food_pictures/";
     private String food_thumbnail_dir = "food_thumbnails/";
-    private FirebaseAuth mAuth;
-    private boolean isSignIn = false;
-    private Uri requestedUri = null;
-    public MyFireBase() {
-        mAuth = FirebaseAuth.getInstance();
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            isSignIn = true;
-        } else {
-            signInAnonymously();
-        }
-        // Create a storage reference from our app
+    ProgressBar progressBar;
+    private StorageReference storageRef;
+
+    private Context context;
+
+    public MyFireBaseStorage(Context context, ProgressBar progressBar){
+        this.context = context;
+        this.progressBar = progressBar;
     }
 
-    public Uri DownloadPhoto(String fileName, int directory) {
+    public void DownloadAndSetPhotoInView(String fileName, int directory, final ImageView imageView) {
         Log.e(Tag, "start downloadPhoto");
         storageRef = FirebaseStorage.getInstance().getReference();
         StorageReference storageRefTemp = null;
@@ -58,32 +53,22 @@ public class MyFireBase {
             storageRefTemp.child(fileName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                 @Override
                 public void onSuccess(Uri uri) {
-                    requestedUri = uri;
+                    if(uri != null)
+                        Picasso.get().load(uri).into(imageView);
+                    else
+                        Picasso.get().load(R.drawable.image_not_found).into(imageView);
+                    progressBar.setVisibility(View.GONE);
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
-                    int n = 0;
-                    // Handle any errors
+                    Picasso.get().load(R.drawable.image_not_found).into(imageView);
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(context, "can't retrieve the photo", Toast.LENGTH_SHORT).show();
+                    ///imageView.setImageResource(R.drawable.image_not_found);
                 }
             });
         }
         Log.e(Tag, "end downloadPhoto");
-        return requestedUri;
-    }
-
-    private void signInAnonymously() {
-        mAuth.signInAnonymously();
-                /*.addOnSuccessListener(this, new OnSuccessListener<AuthResult>() {
-            @Override public void onSuccess(AuthResult authResult) {
-                // do your stuff
-            }
-        }) .addOnFailureListener(this, new OnFailureListener() {
-            @Override public void onFailure(@NonNull Exception exception) {
-                //Log.e("TAG", "signInAnonymously:FAILURE", exception);
-            }
-        });
-    }
-    */
     }
 }

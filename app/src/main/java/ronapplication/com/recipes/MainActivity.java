@@ -14,9 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ronapplication.com.recipes.Adapter.SearchAdapter;
-import ronapplication.com.recipes.Database.Database;
-
-import static android.view.View.inflate;
+import ronapplication.com.recipes.Provider.InternalSQLDatabase.MySQLDatabase;
 
 public class MainActivity extends Activity{
 
@@ -28,7 +26,7 @@ public class MainActivity extends Activity{
     MaterialSearchBar materialSearchBar;
     List<String> suggestList = new ArrayList<>();
 
-    Database database;
+    MySQLDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +44,7 @@ public class MainActivity extends Activity{
         */
         materialSearchBar = findViewById(R.id.main_search_bar);
         //init DB
-        database = new Database(this);
+        database = new MySQLDatabase(this);
 
         //Setup search bar
         initMaterialSearch();

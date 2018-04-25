@@ -3,7 +3,6 @@ package ronapplication.com.recipes;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -13,15 +12,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -29,7 +23,7 @@ import com.google.firebase.storage.StorageReference;
 import com.ortiz.touchview.TouchImageView;
 import com.squareup.picasso.Picasso;
 
-import ronapplication.com.recipes.Database.MyFireBase;
+import ronapplication.com.recipes.Provider.MyFireBase;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -79,51 +73,16 @@ public class FullscreenActivity extends AppCompatActivity {
         }
 
         else{
-            fireBase = new MyFireBase();
+            fireBase = new MyFireBase(getBaseContext(), progressBar);
+            fireBase.DownloadAndSetPhotoInView(fileName, Constants.STORAGE_IMAGES_RECIPES, touchImageView);
             //asyncTaskImageLoader = new MyAsyncTaskImageLoader(this, touchImageView);
             //asyncTaskImageLoader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            loadImageToTouchView();
+            //loadImageToTouchView();
         }
         Log.d(Tag, "end onCreate");
     }
 
-    private void loadImageToTouchView() {
-        progressBar.setVisibility(View.VISIBLE);
-        StorageReference storageRef;
-        storageRef = FirebaseStorage.getInstance().getReference();
-        storageRef.child(Constants.FIREBASE_IMAGES_PATH+Constants.STORAGE_RECIPES+fileName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                if(uri != null)
-                    /*
-                    Glide.with(getBaseContext()).load(uri).asBitmap().into(new SimpleTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                            touchImageView.setImageBitmap(resource);
-                        }
-                    });
-                    */
-                    Picasso.get().load(uri).into(touchImageView);
-                else
-                    Picasso.get().load(R.drawable.image_not_found).into(touchImageView);
 
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                Picasso.get().load(R.drawable.image_not_found).into(touchImageView);
-                Toast.makeText(getApplicationContext(), "can't retrieve the photo", Toast.LENGTH_SHORT).show();
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        finish();
-                    }
-                },2500);
-            }
-        });
-        progressBar.setVisibility(View.GONE);
-    }
 
     @Override
     public void onStart() {
@@ -205,6 +164,44 @@ public class FullscreenActivity extends AppCompatActivity {
             isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected();
         }
         return isNetworkAvailable;
+    }
+
+    private void loadImageToTouchView() {
+        progressBar.setVisibility(View.VISIBLE);
+        StorageReference storageRef;
+        storageRef = FirebaseStorage.getInstance().getReference();
+        storageRef.child(Constants.FIREBASE_IMAGES_PATH+Constants.STORAGE_RECIPES+fileName).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                if(uri != null)
+                    /*
+                    Glide.with(getBaseContext()).load(uri).asBitmap().into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                            touchImageView.setImageBitmap(resource);
+                        }
+                    });
+                    */
+                    Picasso.get().load(uri).into(touchImageView);
+                else
+                    Picasso.get().load(R.drawable.image_not_found).into(touchImageView);
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                Picasso.get().load(R.drawable.image_not_found).into(touchImageView);
+                Toast.makeText(getApplicationContext(), "can't retrieve the photo", Toast.LENGTH_SHORT).show();
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        finish();
+                    }
+                },2500);
+            }
+        });
+        progressBar.setVisibility(View.GONE);
     }
 
     protected class MyAsyncTaskAutoHide extends AsyncTask<Void, Void, String> {
