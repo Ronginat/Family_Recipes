@@ -21,9 +21,10 @@
         </activity>
         <activity
             android:name=".FullscreenActivity"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_fullscreen"
-            android:theme="@style/FullscreenTheme" />
+            android:label="@string/title_activity_fullscreen"/>
+            <!--android:theme="@style/FullscreenTheme" -->
     </application>
 
 </manifest> <!-- android:supportsRtl="true" -->

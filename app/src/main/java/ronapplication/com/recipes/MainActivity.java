@@ -1,14 +1,22 @@
 package ronapplication.com.recipes;
 
-import android.app.Activity;
+import android.app.SearchableInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
+
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.mancj.materialsearchbar.MaterialSearchBar;
 
@@ -18,17 +26,18 @@ import java.util.List;
 import ronapplication.com.recipes.Adapter.SearchAdapter;
 import ronapplication.com.recipes.Provider.InternalSQLDatabase.MySQLDatabase;
 
-public class MainActivity extends Activity{
+public class MainActivity extends AppCompatActivity {
 
     final String TAG = "main";
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
     SearchAdapter adapter;
 
-    FloatingActionButton floatingMoreButton;
     FloatingActionButton floatingPlusButton;
+    Toolbar toolbar;
 
     MaterialSearchBar materialSearchBar;
+    SearchView searchView;
     List<String> suggestList = new ArrayList<>();
 
     MySQLDatabase database;
@@ -41,6 +50,15 @@ public class MainActivity extends Activity{
 
         //init View
         bindUI();
+        setSupportActionBar(toolbar);
+
+        /*
+        // Get a support ActionBar corresponding to this toolbar
+        ActionBar ab = getSupportActionBar();
+
+        // Enable the Up button
+        ab.setDisplayHomeAsUpEnabled(true);
+        */
         initRecycler();
         /*
         layoutManager = new LinearLayoutManager(this);
@@ -52,7 +70,7 @@ public class MainActivity extends Activity{
         database = new MySQLDatabase(this);
 
         //Setup search bar
-        initMaterialSearch();
+        //initMaterialSearch();
 
         //init adapter default set all result
         adapter = new SearchAdapter(this, database.getRecipes());
@@ -60,15 +78,122 @@ public class MainActivity extends Activity{
         Log.e(TAG, "end onCreate");
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+
+
+        final MenuItem searchItem = menu.findItem(R.id.menu_search);
+        searchView = (SearchView) searchItem.getActionView();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Toast.makeText(MainActivity.this, "onQueryTextSubmit",Toast.LENGTH_SHORT).show();
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                Toast.makeText(MainActivity.this, "onQueryTextChange",Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
+
+        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                Toast.makeText(MainActivity.this, "onSuggestionSelect",Toast.LENGTH_SHORT).show();
+                //Called when a suggestion was selected by navigating to it
+                return false;
+                //true if the listener handles the event and wants to override the default behavior of possibly
+                // rewriting the query based on the selected item, false otherwise
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+                Toast.makeText(MainActivity.this, "onSuggestionClick",Toast.LENGTH_SHORT).show();
+                //Called when a suggestion was clicked
+                return false;
+            }
+        });
+
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                floatingPlusButton.setVisibility(View.VISIBLE);
+                //Toast.makeText(MainActivity.this, "collapse search", Toast.LENGTH_SHORT).show();
+                return true;  // Return true to collapse action view
+            }
+
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                floatingPlusButton.setVisibility(View.GONE);
+                return true;  // Return true to expand action view
+            }
+        });
+
+        /*
+        MenuItem searchItem = menu.findItem(R.id.menu_search);
+        materialSearchBar =
+                (MaterialSearchBar) searchItem.getActionView();
+        //initMaterialSearch();
+        */
+        // Define the listener
+
+
+        // Configure the search info and add any event listeners...
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                Toast.makeText(this, "settings", Toast.LENGTH_SHORT).show();
+                // User chose the "Settings" item, show the app settings UI...
+                return true;
+
+            case R.id.action_favorite:
+                Toast.makeText(this, "favorites", Toast.LENGTH_SHORT);
+                // User chose the "Favorite" action, mark the current item
+                // as a favorite...
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+
+
     private void bindUI() {
         recyclerView = findViewById(R.id.main_recycler_search);
-        materialSearchBar = findViewById(R.id.main_search_bar);
-        floatingMoreButton = findViewById(R.id.main_more_ActionButton);
+        //materialSearchBar = findViewById(R.id.main_search_bar);
+        //floatingMoreButton = findViewById(R.id.main_more_ActionButton);
+        toolbar = findViewById(R.id.main_toolbar);
         floatingPlusButton = findViewById(R.id.main_add_recipe_button);
     }
 
     private void initMaterialSearch(){
-        materialSearchBar.setHint("Search");
+        /*
+        android:id="@+id/main_search_bar"
+                app:mt_speechMode="false"
+                app:mt_hint="Search"
+                android:layout_marginBottom="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"></com.mancj.materialsearchbar.MaterialSearchBar>
+
+         */
+        materialSearchBar.setSpeechMode(false);
+        materialSearchBar.setHint(getString(R.string.materialbar_search_hint));
+        materialSearchBar.setPadding(0,0,0,5);
+        materialSearchBar.setMaxSuggestionCount(20);
+        //materialSearchBar.setHint("Search");
         materialSearchBar.setCardViewElevation(10);
         loadSuggestList();
         materialSearchBar.addTextChangeListener(new TextWatcher() {
@@ -99,10 +224,10 @@ public class MainActivity extends Activity{
                     //if close Search, just restore default
                     adapter = new SearchAdapter(getBaseContext(), database.getRecipes());
                     recyclerView.setAdapter(adapter);
-                    floatingPlusButton.setVisibility(View.VISIBLE);
+                    //floatingPlusButton.setVisibility(View.VISIBLE);
                 }
-                else
-                    floatingPlusButton.setVisibility(View.GONE);
+                //else
+                    //floatingPlusButton.setVisibility(View.GONE);
             }
 
             @Override

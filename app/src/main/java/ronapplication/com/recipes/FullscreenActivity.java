@@ -87,21 +87,22 @@ public class FullscreenActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        asyncTaskAutoHide.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        //asyncTaskAutoHide.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         // stop async task...
-        if(!asyncTaskAutoHide.isCancelled())
-            asyncTaskAutoHide.cancel(true);
+        //if(!asyncTaskAutoHide.isCancelled())
+            //asyncTaskAutoHide.cancel(true);
     }
 
     private void bindUIAndListeners(){
         mContentView = findViewById(R.id.fullscreen_content);
         touchImageView = findViewById(R.id.full_screen_image);
         progressBar = findViewById(R.id.full_screen_progressBar);
+        /*
         touchImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -117,6 +118,7 @@ public class FullscreenActivity extends AppCompatActivity {
                 }
             }
         });
+        */
     }
 
     private void initHideRunnable() {
@@ -147,10 +149,16 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
     private boolean isNetworkAvailable() {
-        int countAttempts = 0;
-        String dialogTitle = "Checking connection";
+        //int countAttempts = 0;
+        //String dialogTitle = "Checking connection";
         boolean isNetworkAvailable = false;
-        ProgressDialog dialog = null;
+        //ProgressDialog dialog = null;
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        return isNetworkAvailable;
+        /*
         while(!isNetworkAvailable && countAttempts < 3) {
             if(countAttempts == 1){
                 dialog = ProgressDialog.show(this, dialogTitle, "failed attempt #" + countAttempts);
@@ -164,6 +172,7 @@ public class FullscreenActivity extends AppCompatActivity {
             isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected();
         }
         return isNetworkAvailable;
+        */
     }
 
     private void loadImageToTouchView() {

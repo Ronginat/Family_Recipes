@@ -36,6 +36,7 @@ public class MyFireBaseStorage {
 
     public void DownloadAndSetPhotoInView(String fileName, int directory, final ImageView imageView) {
         Log.e(Tag, "start downloadPhoto");
+        progressBar.setVisibility(View.VISIBLE);
         storageRef = FirebaseStorage.getInstance().getReference();
         StorageReference storageRefTemp = null;
         switch (directory) {
