@@ -20,7 +20,7 @@ import ronapplication.com.recipes.R;
 class SearchViewHolder extends RecyclerView.ViewHolder implements RecyclerView.OnClickListener{
 
     private Context context;
-    public TextView name, description, category1;//, category2;
+    public TextView name, description, kind;//, category2;
     protected String fileName, recipeName;
 
     public SearchViewHolder(View itemView, Context context) {
@@ -29,7 +29,7 @@ class SearchViewHolder extends RecyclerView.ViewHolder implements RecyclerView.O
         itemView.setOnClickListener(this);
         name = itemView.findViewById(R.id.item_name);
         description = itemView.findViewById(R.id.item_description);
-        category1 = itemView.findViewById(R.id.item_category1);
+        kind = itemView.findViewById(R.id.item_food_kind);
         //category2 = itemView.findViewById(R.id.item_category2);
     }
 
@@ -65,7 +65,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchViewHolder> {
     public void onBindViewHolder(@NonNull SearchViewHolder holder, int position) {
         holder.name.setText(recipes.get(position).getName());
         holder.description.setText(recipes.get(position).getDescription());
-        holder.category1.setText(recipes.get(position).getCategory1());
+        holder.kind.setText(recipes.get(position).getKind());
         holder.fileName = recipes.get(position).getFileName();
         holder.recipeName = recipes.get(position).getName();
         //holder.category2.setText(recipes.get(position).getCategory2());

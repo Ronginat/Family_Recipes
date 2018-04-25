@@ -2,11 +2,13 @@ package ronapplication.com.recipes;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 
 import com.mancj.materialsearchbar.MaterialSearchBar;
 
@@ -23,6 +25,9 @@ public class MainActivity extends Activity{
     RecyclerView.LayoutManager layoutManager;
     SearchAdapter adapter;
 
+    FloatingActionButton floatingMoreButton;
+    FloatingActionButton floatingPlusButton;
+
     MaterialSearchBar materialSearchBar;
     List<String> suggestList = new ArrayList<>();
 
@@ -35,14 +40,14 @@ public class MainActivity extends Activity{
         Log.e(TAG, "start onCreate");
 
         //init View
-        recyclerView = findViewById(R.id.main_recycler_search);
+        bindUI();
         initRecycler();
         /*
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         */
-        materialSearchBar = findViewById(R.id.main_search_bar);
+
         //init DB
         database = new MySQLDatabase(this);
 
@@ -58,6 +63,8 @@ public class MainActivity extends Activity{
     private void bindUI() {
         recyclerView = findViewById(R.id.main_recycler_search);
         materialSearchBar = findViewById(R.id.main_search_bar);
+        floatingMoreButton = findViewById(R.id.main_more_ActionButton);
+        floatingPlusButton = findViewById(R.id.main_add_recipe_button);
     }
 
     private void initMaterialSearch(){
@@ -92,7 +99,10 @@ public class MainActivity extends Activity{
                     //if close Search, just restore default
                     adapter = new SearchAdapter(getBaseContext(), database.getRecipes());
                     recyclerView.setAdapter(adapter);
+                    floatingPlusButton.setVisibility(View.VISIBLE);
                 }
+                else
+                    floatingPlusButton.setVisibility(View.GONE);
             }
 
             @Override
