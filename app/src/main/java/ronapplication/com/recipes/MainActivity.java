@@ -1,9 +1,14 @@
 package ronapplication.com.recipes;
 
+import android.app.SearchManager;
 import android.app.SearchableInfo;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,6 +30,7 @@ import java.util.List;
 
 import ronapplication.com.recipes.Adapter.SearchAdapter;
 import ronapplication.com.recipes.Provider.InternalSQLDatabase.MySQLDatabase;
+import ronapplication.com.recipes.Provider.MySuggestionProvider;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -84,13 +90,21 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.main_menu, menu);
 
 
-        final MenuItem searchItem = menu.findItem(R.id.menu_search);
+        final MenuItem searchItem = menu.findItem(R.id.action_search);
         searchView = (SearchView) searchItem.getActionView();
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(false);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Toast.makeText(MainActivity.this, "onQueryTextSubmit",Toast.LENGTH_SHORT).show();
+                saveRecentQuery(query);
                 return false;
             }
 
@@ -106,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onSuggestionSelect(int position) {
                 Toast.makeText(MainActivity.this, "onSuggestionSelect",Toast.LENGTH_SHORT).show();
                 //Called when a suggestion was selected by navigating to it
-                return false;
+                return true;
                 //true if the listener handles the event and wants to override the default behavior of possibly
                 // rewriting the query based on the selected item, false otherwise
             }
@@ -115,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onSuggestionClick(int position) {
                 Toast.makeText(MainActivity.this, "onSuggestionClick",Toast.LENGTH_SHORT).show();
                 //Called when a suggestion was clicked
-                return false;
+                return true;
             }
         });
 
@@ -123,16 +137,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 floatingPlusButton.setVisibility(View.VISIBLE);
-                //Toast.makeText(MainActivity.this, "collapse search", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "collapse search", Toast.LENGTH_SHORT).show();
                 return true;  // Return true to collapse action view
             }
 
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 floatingPlusButton.setVisibility(View.GONE);
+                Toast.makeText(MainActivity.this, "expand search", Toast.LENGTH_SHORT).show();
                 return true;  // Return true to expand action view
             }
         });
+
 
         /*
         MenuItem searchItem = menu.findItem(R.id.menu_search);
@@ -155,17 +171,40 @@ public class MainActivity extends AppCompatActivity {
                 // User chose the "Settings" item, show the app settings UI...
                 return true;
 
-            case R.id.action_favorite:
-                Toast.makeText(this, "favorites", Toast.LENGTH_SHORT);
-                // User chose the "Favorite" action, mark the current item
-                // as a favorite...
+            case R.id.action_clear_history:
+                //Toast.makeText(this, "clear", Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+                alertBuilder.setCancelable(true);
+                alertBuilder.setTitle("מחיקת היסטוריה");
+                alertBuilder.setMessage("האם אתה בטוח שאתה רוצה למחוק את היסטוריית החיפושים?");
+                alertBuilder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        clearRecentSuggestionsHistory();
+                        Toast.makeText(MainActivity.this, "היסטוריה נמחקה", Toast.LENGTH_SHORT).show();
+                        //dialog.dismiss();
+                    }
+                });
+                alertBuilder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                AlertDialog alert = alertBuilder.create();
+                alert.show();
+                return true;
+
+            case R.id.action_search:
+                //onSearchRequested();
+                //Toast.makeText(this, "search requested", Toast.LENGTH_SHORT).show();
                 return true;
 
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
-
         }
     }
 
@@ -256,5 +295,17 @@ public class MainActivity extends AppCompatActivity {
     private void loadSuggestList() {
         suggestList = database.getNames();
         materialSearchBar.setLastSuggestions(suggestList);
+    }
+
+    private void saveRecentQuery(String query){
+        SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
+                MySuggestionProvider.AUTHORITY, MySuggestionProvider.MODE);
+        suggestions.saveRecentQuery(query, null);
+    }
+
+    private void clearRecentSuggestionsHistory(){
+        SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
+                MySuggestionProvider.AUTHORITY, MySuggestionProvider.MODE);
+        suggestions.clearHistory();
     }
 }
