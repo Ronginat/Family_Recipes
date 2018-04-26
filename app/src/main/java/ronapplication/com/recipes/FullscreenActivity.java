@@ -33,9 +33,8 @@ public class FullscreenActivity extends AppCompatActivity {
 
     private final String Tag = "FullScreen";
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-    boolean isNavigationVisible = true, autoHide = true;
+    boolean isNavigationVisible = false;
 
-    MyAsyncTaskAutoHide asyncTaskAutoHide;
     //MyAsyncTaskImageLoader asyncTaskImageLoader;
 
     TouchImageView touchImageView;
@@ -53,12 +52,17 @@ public class FullscreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
 
-        initHideRunnable();
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        //initHideRunnable();
         bindUIAndListeners();
         getParametersFromIntent();
-        setTitle(recipeName);
-        asyncTaskAutoHide = new MyAsyncTaskAutoHide();
-        //progressBar.setVisibility(View.GONE);
+        //setTitle(recipeName);
 
         if(!isNetworkAvailable()) {
             touchImageView = findViewById(R.id.full_screen_image);
@@ -83,38 +87,32 @@ public class FullscreenActivity extends AppCompatActivity {
     }
 
 
-
     @Override
     public void onStart() {
         super.onStart();
-        //asyncTaskAutoHide.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        // stop async task...
-        //if(!asyncTaskAutoHide.isCancelled())
-            //asyncTaskAutoHide.cancel(true);
     }
 
     private void bindUIAndListeners(){
         mContentView = findViewById(R.id.fullscreen_content);
         touchImageView = findViewById(R.id.full_screen_image);
         progressBar = findViewById(R.id.full_screen_progressBar);
+
         /*
         touchImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(isNavigationVisible) {
-                    mHideHandler.postDelayed(mHideRunnable, 500);
+                    //mHideHandler.postDelayed(mHideRunnable, 500);
                     isNavigationVisible = false;
                 }
                 else{
-                    mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+                    mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
                     isNavigationVisible = true;
-                    autoHide = false;
                 }
             }
         });
@@ -151,28 +149,12 @@ public class FullscreenActivity extends AppCompatActivity {
     private boolean isNetworkAvailable() {
         //int countAttempts = 0;
         //String dialogTitle = "Checking connection";
-        boolean isNetworkAvailable = false;
         //ProgressDialog dialog = null;
+        //dialog = ProgressDialog.show(this, dialogTitle, "failed attempt #" + countAttempts);
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected();
-        return isNetworkAvailable;
-        /*
-        while(!isNetworkAvailable && countAttempts < 3) {
-            if(countAttempts == 1){
-                dialog = ProgressDialog.show(this, dialogTitle, "failed attempt #" + countAttempts);
-            }
-            else if(countAttempts > 1){
-                dialog.setMessage("failed attempt #" + countAttempts);
-            }
-            ConnectivityManager connectivityManager
-                    = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-            isNetworkAvailable = activeNetworkInfo != null && activeNetworkInfo.isConnected();
-        }
-        return isNetworkAvailable;
-        */
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     private void loadImageToTouchView() {
@@ -213,38 +195,4 @@ public class FullscreenActivity extends AppCompatActivity {
         progressBar.setVisibility(View.GONE);
     }
 
-    protected class MyAsyncTaskAutoHide extends AsyncTask<Void, Void, String> {
-        private final String AutoHideTag = "AsyncAutoHide";
-
-        @Override
-        protected String doInBackground(Void... params) {
-            try {
-                while(autoHide) {
-                    if(isCancelled())
-                        break;
-                    Thread.sleep(AUTO_HIDE_DELAY_MILLIS);
-                    publishProgress();
-                }
-            }
-            catch (InterruptedException e) {
-                Log.e(AutoHideTag, e.getMessage());
-                return null;
-            }
-            return "COMPLETE!";
-        }
-
-        // -- called from the publish progress
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-            if (isNavigationVisible && autoHide)
-                mHideRunnable.run();
-        }
-
-        // -- called as soon as doInBackground method completes
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-        }
-    }
 }

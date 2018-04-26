@@ -17,7 +17,6 @@
         <activity android:name=".MainActivity" android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <!--action android:name="android.intent.action.SEARCH" /-->
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -25,11 +24,10 @@
         </activity>
         <activity
             android:name=".FullscreenActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_fullscreen"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
-        <!-- android:theme="@style/FullscreenTheme" -->
-        <activity android:name=".FiltersActivity"></activity>
+            android:theme="@style/AppFullScreenTheme" />
+
     </application>
 
 </manifest> <!-- android:supportsRtl="true" -->

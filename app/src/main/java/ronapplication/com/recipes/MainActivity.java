@@ -1,5 +1,8 @@
 package ronapplication.com.recipes;
 
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -17,6 +20,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.mancj.materialsearchbar.MaterialSearchBar;
@@ -35,13 +41,14 @@ public class MainActivity extends AppCompatActivity {
     SearchAdapter adapter;
 
     FloatingActionButton floatingPlusButton;
-    Toolbar toolbar;
+    FloatingActionButton floatingFilterButton;
 
     MaterialSearchBar materialSearchBar;
     //SearchView searchView;
     List<String> suggestList = new ArrayList<>();
 
     MySQLDatabase database;
+    Dialog filtersDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,23 +56,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Log.e(TAG, "start onCreate");
 
+        filtersDialog = new Dialog(this);
         //init View
         bindUI();
-        //setSupportActionBar(toolbar);
-
-        /*
-        // Get a support ActionBar corresponding to this toolbar
-        ActionBar ab = getSupportActionBar();
-
-        // Enable the Up button
-        ab.setDisplayHomeAsUpEnabled(true);
-        */
         initRecycler();
-        /*
+
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
-        */
+
 
         //init DB
         database = new MySQLDatabase(this);
@@ -80,109 +79,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 /*
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-
-
-        MenuItem searchItem = menu.findItem(R.id.action_search);
-        ConstraintLayout rootView = (ConstraintLayout)searchItem.getActionView();
-        materialSearchBar = rootView.findViewById(R.id.my_material_search_bar);
-
-        initMaterialSearch();
-
-
-        // Associate searchable configuration with the SearchView
-        final SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(true);
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                Toast.makeText(MainActivity.this, "onQueryTextSubmit",Toast.LENGTH_SHORT).show();
-                saveRecentQuery(query);
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                Toast.makeText(MainActivity.this, "onQueryTextChange",Toast.LENGTH_SHORT).show();
-                return false;
-            }
-        });
-
-        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
-            @Override
-            public boolean onSuggestionSelect(int position) {
-                Toast.makeText(MainActivity.this, "onSuggestionSelect",Toast.LENGTH_SHORT).show();
-                //searchView.setQuery(searchView.getSuggestionsAdapter().getItem(position).toString(), false);
-                //Called when a suggestion was selected by navigating to it
-                return true;
-                //true if the listener handles the event and wants to override the default behavior of possibly
-                // rewriting the query based on the selected item, false otherwise
-            }
-
-            @Override
-            public boolean onSuggestionClick(int position) {
-                Toast.makeText(MainActivity.this, "onSuggestionClick",Toast.LENGTH_SHORT).show();
-                //Called when a suggestion was clicked
-                return true;
-            }
-        });
-
-
-        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-            @Override
-            public boolean onMenuItemActionCollapse(MenuItem item) {
-                floatingPlusButton.setVisibility(View.VISIBLE);
-                Toast.makeText(MainActivity.this, "collapse search", Toast.LENGTH_SHORT).show();
-                return true;  // Return true to collapse action view
-            }
-
-            @Override
-            public boolean onMenuItemActionExpand(MenuItem item) {
-                floatingPlusButton.setVisibility(View.GONE);
-                Toast.makeText(MainActivity.this, "expand search", Toast.LENGTH_SHORT).show();
-                return true;  // Return true to expand action view
-            }
-        });
-
-
-
-        MenuItem searchItem = menu.findItem(R.id.menu_search);
-        materialSearchBar =
-                (MaterialSearchBar) searchItem.getActionView();
-        //initMaterialSearch();
-
-        // Define the listener
-
-
-        // Configure the search info and add any event listeners...
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_settings:
-                Toast.makeText(this, "settings", Toast.LENGTH_SHORT).show();
-                // User chose the "Settings" item, show the app settings UI...
-                return true;
-
-            case R.id.action_search:
-                //onSearchRequested();
-                //Toast.makeText(this, "search requested", Toast.LENGTH_SHORT).show();
-                return true;
-
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-        }
 
             case R.id.action_clear_history:
                 //Toast.makeText(this, "clear", Toast.LENGTH_SHORT).show();
@@ -211,25 +107,45 @@ public class MainActivity extends AppCompatActivity {
     }
 */
 
-
     private void bindUI() {
         recyclerView = findViewById(R.id.main_recycler_search);
         materialSearchBar = findViewById(R.id.main_search_bar);
         //floatingMoreButton = findViewById(R.id.main_more_ActionButton);
         //toolbar = findViewById(R.id.main_toolbar);
         floatingPlusButton = findViewById(R.id.main_add_recipe_button);
+        floatingFilterButton = findViewById(R.id.main_filter_button);
+
+        floatingPlusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //saveUserChoose()
+                Toast.makeText(MainActivity.this, "add new recipe", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    //listens to floatingFilterButton onClick
+    public void ShowPopup(View view){
+        Log.e(TAG,"start ShowPopup");
+        filtersDialog.setContentView(R.layout.layout_filters);
+        Button closeButton = filtersDialog.findViewById(R.id.filters_finish_button);
+        ListView FoodKindsListView = filtersDialog.findViewById(R.id.filters_food_kinds_listView);
+        ListView holidaysListView = filtersDialog.findViewById(R.id.filters_holidays_listView);
+        RadioButton radioButton1 = filtersDialog.findViewById(R.id.filters_kashrut1);
+        RadioButton radioButton2 = filtersDialog.findViewById(R.id.filters_kashrut2);
+        RadioButton radioButton3 = filtersDialog.findViewById(R.id.filters_kashrut3);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                filtersDialog.dismiss();
+            }
+        });
+        //filtersDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        filtersDialog.show();
     }
 
     private void initMaterialSearch(){
-        /*
-        android:id="@+id/main_search_bar"
-                app:mt_speechMode="false"
-                app:mt_hint="Search"
-                android:layout_marginBottom="5dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"></com.mancj.materialsearchbar.MaterialSearchBar>
 
-         */
         materialSearchBar.setSpeechMode(false);
         materialSearchBar.setHint(getString(R.string.materialbar_search_hint));
         materialSearchBar.setPadding(0,0,0,5);
@@ -265,10 +181,17 @@ public class MainActivity extends AppCompatActivity {
                     //if close Search, just restore default
                     adapter = new SearchAdapter(getBaseContext(), database.getRecipes());
                     recyclerView.setAdapter(adapter);
-                    //floatingPlusButton.setVisibility(View.VISIBLE);
+                    //add fading out
+                    //ask noam
+                    floatingPlusButton.setVisibility(View.VISIBLE);
+                    floatingFilterButton.setVisibility(View.VISIBLE);
                 }
-                //else
-                    //floatingPlusButton.setVisibility(View.GONE);
+                else {
+                    //add fading in
+                    //ask noam
+                    floatingPlusButton.setVisibility(View.GONE);
+                    floatingFilterButton.setVisibility(View.GONE);
+                }
             }
 
             @Override
