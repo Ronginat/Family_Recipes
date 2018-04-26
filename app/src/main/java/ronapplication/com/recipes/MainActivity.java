@@ -4,8 +4,10 @@ import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -43,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     Toolbar toolbar;
 
     MaterialSearchBar materialSearchBar;
-    SearchView searchView;
+    //SearchView searchView;
     List<String> suggestList = new ArrayList<>();
 
     MySQLDatabase database;
@@ -90,15 +92,22 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.main_menu, menu);
 
 
-        final MenuItem searchItem = menu.findItem(R.id.action_search);
-        searchView = (SearchView) searchItem.getActionView();
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        ConstraintLayout rootView = (ConstraintLayout)searchItem.getActionView();
+        materialSearchBar = rootView.findViewById(R.id.my_material_search_bar);
+
+        materialSearchBar.setMaxSuggestionCount(20);
+        materialSearchBar.setHint("Search");
+        materialSearchBar.setCardViewElevation(10);
+
+        /*
         // Associate searchable configuration with the SearchView
-        SearchManager searchManager =
+        final SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
-        searchView.setIconifiedByDefault(false);
+        searchView.setIconifiedByDefault(true);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -119,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onSuggestionSelect(int position) {
                 Toast.makeText(MainActivity.this, "onSuggestionSelect",Toast.LENGTH_SHORT).show();
+                //searchView.setQuery(searchView.getSuggestionsAdapter().getItem(position).toString(), false);
                 //Called when a suggestion was selected by navigating to it
                 return true;
                 //true if the listener handles the event and wants to override the default behavior of possibly
@@ -132,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+        */
 
         searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
@@ -161,6 +172,20 @@ public class MainActivity extends AppCompatActivity {
 
         // Configure the search info and add any event listeners...
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            Toast.makeText(this,"newIntent", Toast.LENGTH_SHORT).show();
+            // Do work using string
+        }
     }
 
     @Override
