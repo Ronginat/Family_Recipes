@@ -1,12 +1,6 @@
 package ronapplication.com.recipes;
 
-import android.app.SearchManager;
-import android.app.SearchableInfo;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-import android.provider.SearchRecentSuggestions;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
@@ -32,7 +26,6 @@ import java.util.List;
 
 import ronapplication.com.recipes.Adapter.SearchAdapter;
 import ronapplication.com.recipes.Provider.InternalSQLDatabase.MySQLDatabase;
-import ronapplication.com.recipes.Provider.MySuggestionProvider;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -58,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
         //init View
         bindUI();
-        setSupportActionBar(toolbar);
+        //setSupportActionBar(toolbar);
 
         /*
         // Get a support ActionBar corresponding to this toolbar
@@ -78,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         database = new MySQLDatabase(this);
 
         //Setup search bar
-        //initMaterialSearch();
+        initMaterialSearch();
 
         //init adapter default set all result
         adapter = new SearchAdapter(this, database.getRecipes());
@@ -86,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         Log.e(TAG, "end onCreate");
     }
 
-
+/*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
@@ -96,11 +89,9 @@ public class MainActivity extends AppCompatActivity {
         ConstraintLayout rootView = (ConstraintLayout)searchItem.getActionView();
         materialSearchBar = rootView.findViewById(R.id.my_material_search_bar);
 
-        materialSearchBar.setMaxSuggestionCount(20);
-        materialSearchBar.setHint("Search");
-        materialSearchBar.setCardViewElevation(10);
+        initMaterialSearch();
 
-        /*
+
         // Associate searchable configuration with the SearchView
         final SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -142,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-        */
+
 
         searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
@@ -161,31 +152,17 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        /*
+
         MenuItem searchItem = menu.findItem(R.id.menu_search);
         materialSearchBar =
                 (MaterialSearchBar) searchItem.getActionView();
         //initMaterialSearch();
-        */
+
         // Define the listener
 
 
         // Configure the search info and add any event listeners...
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        setIntent(intent);
-        handleIntent(intent);
-    }
-
-    private void handleIntent(Intent intent) {
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            Toast.makeText(this,"newIntent", Toast.LENGTH_SHORT).show();
-            // Do work using string
-        }
     }
 
     @Override
@@ -196,6 +173,17 @@ public class MainActivity extends AppCompatActivity {
                 // User chose the "Settings" item, show the app settings UI...
                 return true;
 
+            case R.id.action_search:
+                //onSearchRequested();
+                //Toast.makeText(this, "search requested", Toast.LENGTH_SHORT).show();
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+        }
+
             case R.id.action_clear_history:
                 //Toast.makeText(this, "clear", Toast.LENGTH_SHORT).show();
                 AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
@@ -205,7 +193,6 @@ public class MainActivity extends AppCompatActivity {
                 alertBuilder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        clearRecentSuggestionsHistory();
                         Toast.makeText(MainActivity.this, "היסטוריה נמחקה", Toast.LENGTH_SHORT).show();
                         //dialog.dismiss();
                     }
@@ -221,25 +208,15 @@ public class MainActivity extends AppCompatActivity {
                 alert.show();
                 return true;
 
-            case R.id.action_search:
-                //onSearchRequested();
-                //Toast.makeText(this, "search requested", Toast.LENGTH_SHORT).show();
-                return true;
-
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-        }
     }
-
+*/
 
 
     private void bindUI() {
         recyclerView = findViewById(R.id.main_recycler_search);
-        //materialSearchBar = findViewById(R.id.main_search_bar);
+        materialSearchBar = findViewById(R.id.main_search_bar);
         //floatingMoreButton = findViewById(R.id.main_more_ActionButton);
-        toolbar = findViewById(R.id.main_toolbar);
+        //toolbar = findViewById(R.id.main_toolbar);
         floatingPlusButton = findViewById(R.id.main_add_recipe_button);
     }
 
@@ -320,17 +297,5 @@ public class MainActivity extends AppCompatActivity {
     private void loadSuggestList() {
         suggestList = database.getNames();
         materialSearchBar.setLastSuggestions(suggestList);
-    }
-
-    private void saveRecentQuery(String query){
-        SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
-                MySuggestionProvider.AUTHORITY, MySuggestionProvider.MODE);
-        suggestions.saveRecentQuery(query, null);
-    }
-
-    private void clearRecentSuggestionsHistory(){
-        SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
-                MySuggestionProvider.AUTHORITY, MySuggestionProvider.MODE);
-        suggestions.clearHistory();
     }
 }

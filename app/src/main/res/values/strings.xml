@@ -3,8 +3,7 @@
 
     <string name="title_activity_fullscreen">FullscreenActivity</string>
     <string name="action_settings">הגדרות</string>
-    <string name="action_clear_history">מחיקת היסטורית חיפושים</string>
-    <string name="action_search">חפש מתכון</string>
+    <string name="action_search">חיפוש מתכון</string>
     <string name="action_filter">סינונים</string>
 
     <string name="yes">כן</string>
